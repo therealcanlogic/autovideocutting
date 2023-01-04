@@ -1,0 +1,27 @@
+from flask import Flask, request, render_template, send_file
+import subprocess
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/cut_video', methods=['POST'])
+def cut_video():
+    # Get the start and end times for the cut
+    start_time = request.form['start_time']
+    end_time = request.form['end_time']
+    
+    # Get the file to be cut
+    file = request.files['file']
+    
+    # Use FFmpeg to cut the video
+    cut_command = ['ffmpeg', '-i', file.name, '-ss', start_time, '-to', end_time, '-c', 'copy', 'cut.mp4']
+    subprocess.run(cut_command)
+    
+    # Send the cut video to the client
+    return send_file('cut.mp4', mimetype='video/mp4')
+
+if __name__ == '__main__':
+    app.run()
